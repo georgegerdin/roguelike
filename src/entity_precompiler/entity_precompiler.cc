@@ -8,6 +8,12 @@ int main(int argc, char* argv[]) {
         arguments.push_back(argv[i]);
     }
 
+    if(arguments.size() < 2) {
+        outln("Usage: entity-precompiler <dst-file> <src-file1> [src-file2] ...");
+        outln("Error: At least two arguments required.");
+        return -1;
+    }
+
     Cpp::Preprocessor preprocessor("main.cc", c_str);
     auto tokens = preprocessor.process_and_lex();
     Cpp::Parser parser(tokens, "main.cc");
