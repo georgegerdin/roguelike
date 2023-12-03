@@ -8,3 +8,5 @@ add_executable(game
         )
 
 add_dependencies(game all_generated)
+
+target_include_directories(game PUBLIC ${CMAKE_BINARY_DIR})

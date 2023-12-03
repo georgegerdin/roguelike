@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <map>
+#include <fmt/format.h>
 #include "cpp_parser/parser.hh"
 #include "cpp_parser/util.hh"
 #include "cpp_parser/traverse_ast.hh"
@@ -44,7 +45,7 @@ int main(int argc, char* argv[]) {
 
     std::multimap<NamespaceDefinition, EntityDefinition> entity_definitions;
 
-    NamespaceDefinition current_namespace;
+    NamespaceDefinition current_namespace = "<unnamed>";
 
     auto translation_unit = parser.parse();
     traverse_ast_tree(translation_unit, [&current_namespace, &entity_definitions] (Cpp::AstNodePtr node_ptr) {
@@ -66,7 +67,24 @@ int main(int argc, char* argv[]) {
 
     std::ofstream output(output_file_path);
     if(output.is_open()) {
-        output << "success\n";
+        output << "#include <variant>\n";
+
+        current_namespace = "<unnamed>";
+        for(auto const& e : entity_definitions) {
+            if(current_namespace != e.first) {
+                if(current_namespace != "<unnamed>")
+                    output << ">;\n}\n";
+                output << fmt::format("namespace {} {{\n", e.first);
+                output << fmt::format("\tusing Entity = std::variant<{}", e.second.name);
+                current_namespace= e.first;
+            }
+            else
+                output << fmt::format(", {}", e.second.name);
+        }
+
+        if(current_namespace != "<unnamed>")
+            output << ">;\n}\n";
+
         output.close();
         outln("entity-precompiler compeleted successfully!");
     }
