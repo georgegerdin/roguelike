@@ -3,7 +3,7 @@ function(invoke_generator name generator prefix header implementation)
 
     add_custom_command(
             OUTPUT "${header}" "${implementation}"
-            COMMAND $<TARGET_FILE:${generator}> "${header}.tmp" "${implementation}.tmp" ${invoke_generator_arguments}
+            COMMAND $<TARGET_FILE:${generator}> "${header}" "${implementation}.tmp" ${invoke_generator_arguments}
             COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${implementation}.tmp" "${implementation}"
             VERBATIM
             DEPENDS ${generator}

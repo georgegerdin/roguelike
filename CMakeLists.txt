@@ -13,6 +13,6 @@ invoke_generator(
         "EntityPrecompiler"
         entity-precompiler
         "Entity_"
-        "src/game/entities.hh"
+        "${CMAKE_CURRENT_LIST_DIR}/src/game/entities.hh"
         "${CMAKE_BINARY_DIR}/entities_meta.hh"
 )
