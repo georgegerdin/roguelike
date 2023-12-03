@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <map>
 #include "cpp_parser/parser.hh"
 #include "cpp_parser/util.hh"
 #include "cpp_parser/traverse_ast.hh"
@@ -35,15 +36,33 @@ int main(int argc, char* argv[]) {
     auto tokens = preprocessor.process_and_lex();
     Cpp::Parser parser(tokens, input_file_path);
 
+    struct EntityDefinition {
+        std::string name;
+    };
+
+    using NamespaceDefinition = std::string;
+
+    std::multimap<NamespaceDefinition, EntityDefinition> entity_definitions;
+
+    NamespaceDefinition current_namespace;
+
     auto translation_unit = parser.parse();
-    traverse_ast_tree(translation_unit, [] (Cpp::AstNodePtr node_ptr) {
+    traverse_ast_tree(translation_unit, [&current_namespace, &entity_definitions] (Cpp::AstNodePtr node_ptr) {
         std::visit(Cpp::overloaded{
-                [](Cpp::StructOrClassDeclaration const* soc) { outln("StructOrClass {}", soc->full_name()); },
-                [](Cpp::NamespaceDeclaration const* nd) { outln("Namespace {}", nd->full_name()); },
+                [&current_namespace, &entity_definitions](Cpp::StructOrClassDeclaration const* soc) {
+                    outln("StructOrClass {}", soc->full_name());
+                    entity_definitions.emplace(current_namespace, EntityDefinition{std::string(soc->full_name())});
+                    },
+                [&current_namespace](Cpp::NamespaceDeclaration const* nd) {
+                    outln("Namespace {}", nd->full_name());
+                    current_namespace = nd->full_name();
+                    },
                 [](auto const* node) {
                 }
         }, node_ptr);
     });
+
+    outln("Num entities: {}", entity_definitions.size());
 
     std::ofstream output(output_file_path);
     if(output.is_open()) {
