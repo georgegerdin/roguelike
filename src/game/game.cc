@@ -30,11 +30,15 @@ int main(int argc, char* argv[]) {
     if (!imgui_init()) return 0;
 
     bool done = false;
+    const int frame_width = 200, frame_height = 200;
     while(!done) {
         imgui_start_frame();
 
         ImGui::Begin("Image", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
         ImGui::Text("Hello!");
+        ImGui::BeginChild("world", ImVec2(frame_width, frame_height), true);
+        ImGui::Text("####.....####");
+        ImGui::EndChild();
         ImGui::End();
         done = !imgui_end_frame();
     }
